@@ -179,7 +179,7 @@ class EstudianteController extends AdminController
         $form->text('Nombre', __('Nombre'));
         $form->text('Identificación', __('Identificación'));
         $form->text('Código_estudiantil', __('Código estudiantil'));
-        $form->image('Fotografía', __('Fotografía'))->move('uploads/estudiantes')->uniqueName();
+        $form->image('Fotografía', __('Fotografía'))->move('/estudiantes')->uniqueName();
         $form->text('Dirección_de_residencia', __('Dirección de residencia'));
         $form->text('Teléfono', __('Teléfono'));
         $form->text('Correo', __('Correo'));

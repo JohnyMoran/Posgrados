@@ -86,9 +86,6 @@ class DocenteController extends AdminController
         $grid->column('id', __('Id'));
         $grid->column('Nombre', __('Nombre'));
         $grid->column('Identificación', __('Identificación'));
-        //$grid->column('Fotografía', __('Fotografía'))->display(function ($foto) {
-        //    return $foto ? "<img src='/storage/uploads/estudiantes/$foto' style='max-width:100px; max-height:100px;'>" : 'No cargado';
-        //});
         $grid->column('Fotografía')->image();
         $grid->column('Dirección', __('Dirección'));
         $grid->column('Teléfono', __('Teléfono'));
@@ -168,28 +165,41 @@ class DocenteController extends AdminController
     {
         $form = new Form(new Docente());
 
-        $form->text('Nombre', __('Nombre'));
-        $form->text('Identificación', __('Identificación'));
-        $form->image('Fotografía', __('Fotografía'))->move('uploads/estudiantes')->uniqueName();
-        $form->text('Dirección', __('Dirección'));
-        $form->text('Teléfono', __('Teléfono'));
-        $form->text('Correo', __('Correo'));
+        $form->text('Nombre', __('Nombre'))
+            ->rules('required|max:255');
+        $form->text('Identificación', __('Identificación'))
+            ->creationRules('required|max:20|unique:docentes,Identificación')
+            ->updateRules('required|max:20|unique:docentes,Identificación,{{id}}');
+        $form->image('Fotografía', __('Fotografía'))
+            ->move('uploads/estudiantes')->uniqueName()
+            ->creationRules('required|image|mimes:jpeg,png,jpg,gif|max:5000') 
+            ->updateRules('nullable|image|mimes:jpeg,png,jpg,gif|max:5000');
+        $form->text('Dirección', __('Dirección'))
+            ->updateRules('nullable|max:255');
+        $form->text('Teléfono', __('Teléfono'))
+            ->rules('nullable|max:15');
+        $form->text('Correo', __('Correo'))
+            ->rules('required|email');
         $form->select('Género', __('Género'))->options([
             'Masculino' => 'Masculino',
             'Femenino' => 'Femenino',
             'Otro' => 'Otro',
-        ]);
-        $form->date('Fecha_de_nacimiento', __('Fecha de nacimiento'))->default(date('Y-m-d'));
+        ])
+            ->rules('required|in:Masculino,Femenino,Otro');
+        $form->date('Fecha_de_nacimiento', __('Fecha de nacimiento'))->default(date('Y-m-d'))
+            ->rules('required|date|before_or_equal:today');
         $form->select('Formación_académica', __('Formación académica'))->options([
             'Pregrado' => 'Pregrado',
             'Posgrado' => 'Posgrado',
-        ]);
+        ])
+            ->rules('required|in:Pregrado,Posgrado');
         $form->select('Áreas_de_conocimiento', __('Áreas de conocimiento'))->options([
             'Ingeniería de software' => 'Ingeniería de software',
             'Telecomunicaciones' => 'Telecomunicaciones',
             'Bases de datos' => 'Bases de datos',
-        ]);
-         $form->multipleSelect('programa', 'Programa')
+        ])
+            ->rules('required|in:Ingeniería de software,Telecomunicaciones,Bases de datos');
+        $form->multipleSelect('programa', 'Programa')
             ->options(Programa::all()->pluck('Nombre_del_programa', 'id'));
 
         // Usar el método saving para guardar la relación muchos a muchos en la tabla pivot

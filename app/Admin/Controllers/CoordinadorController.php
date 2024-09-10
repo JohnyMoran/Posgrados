@@ -38,7 +38,7 @@ class CoordinadorController extends AdminController
         $grid->column('Fecha_de_nacimiento', __('Fecha de nacimiento'));
         $grid->column('Fecha_de_vinculación', __('Fecha de vinculación'));
         $grid->column('Acuerdo_de_nombramiento_pdf', __('Acuerdo de nombramiento PDF'))->display(function ($pdf) {
-            return $pdf ? "<a href='/storage/$pdf' target='_blank'>Ver PDF</a>" : 'No cargado';
+            return $pdf ? "<a href='/uploads/$pdf' target='_blank'>Ver PDF</a>" : 'No cargado';
         });
         $grid->column('asistente_name', 'Asistente')->display(function () {
             // Obtener el nombre del asistente desde la tabla admin_users
@@ -89,19 +89,31 @@ class CoordinadorController extends AdminController
     {
         $form = new Form(new Coordinador());
 
-        $form->text('Nombre', __('Nombre'));
-        $form->text('Identificación', __('Identificación'));
-        $form->text('Dirección', __('Dirección'));
-        $form->text('Teléfono', __('Teléfono'));
-        $form->text('Correo', __('Correo'));
+        $form->text('Nombre', __('Nombre'))
+            ->rules('required|max:255');
+        $form->text('Identificación', __('Identificación'))
+            ->creationRules('required|max:10|unique:coordinadores,Identificación')
+            ->updateRules('required|max:10|unique:coordinadores,Identificación,{{id}}');
+        $form->text('Dirección', __('Dirección'))
+            ->rules('required|max:255');
+        $form->text('Teléfono', __('Teléfono'))
+            ->rules('required|max:10');
+        $form->text('Correo', __('Correo'))
+            ->rules('required|email');
         $form->select('Género', __('Género'))->options([
             'Masculino' => 'Masculino',
             'Femenino' => 'Femenino',
             'Otro' => 'Otro',
         ]);
-        $form->date('Fecha_de_nacimiento', __('Fecha de nacimiento'))->default(date('Y-m-d'));
-        $form->date('Fecha_de_vinculación', __('Fecha de vinculación'))->default(date('Y-m-d'));
-        $form->file('Acuerdo_de_nombramiento_pdf', __('Acuerdo de nombramiento PDF'))->rules('mimes:pdf')->move('uploads/coordinadores');
+        $form->date('Fecha_de_nacimiento', __('Fecha de nacimiento'))->default(date('Y-m-d'))
+            ->rules('required|date|before_or_equal:today');
+        $form->date('Fecha_de_vinculación', __('Fecha de vinculación'))->default(date('Y-m-d'))
+            ->updateRules('required|date|after_or_equal:Fecha_de_nacimiento');
+        $form->file('Acuerdo_de_nombramiento_pdf', __('Acuerdo de nombramiento PDF'))
+            ->move('coordinadores/acuerdos')->uniqueName()
+            ->creationRules('required|mimes:pdf|max:10000')
+            ->updateRules('nullable|mimes:pdf|max:10000'); 
+        
         // Relación con Asistente
         $form->select('asistente_id', 'Asistente_de_coordinador')->options(function () {
             return DB::table('admin_users')
@@ -109,7 +121,9 @@ class CoordinadorController extends AdminController
                 ->join('admin_roles', 'admin_role_users.role_id', '=', 'admin_roles.id')
                 ->where('admin_roles.slug', 'asistente') // Ajusta el slug según el rol de asistente
                 ->pluck('admin_users.name', 'admin_users.id');
-        });    
+            })
+            ->creationRules('nullable|exists:admin_users,id')
+            ->updateRules('nullable|exists:admin_users,id');    
         
         return $form;
     }

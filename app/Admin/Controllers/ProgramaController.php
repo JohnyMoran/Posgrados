@@ -9,8 +9,9 @@ use OpenAdmin\Admin\Show;
 use \App\Models\Programa;
 use App\Models\Docente;
 use App\Models\Estudiante;
-use App\Model\Coordinador;
+use App\Models\Coordinador;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use OpenAdmin\Admin\Facades\Admin;
 
 class ProgramaController extends AdminController
@@ -75,6 +76,13 @@ class ProgramaController extends AdminController
             if ($coordinador) {
                 // Filtrar para que el coordinador vea solo su propia información
                 $grid->model()->where('Coordinador_asignado', $coordinador->id);
+                // Deshabilitar la creación de nuevos registros para el asistente
+                $grid->disableCreateButton();
+                $grid->actions(function ($actions) {
+                    // Deshabilitar edición y eliminación para el asistente
+                    $actions->disableEdit();
+                    $actions->disableDelete();
+                });
             }
         }
         
@@ -83,9 +91,6 @@ class ProgramaController extends AdminController
         $grid->column('Código_SNIES', __('Código SNIES'));
         $grid->column('Nombre_del_programa', __('Nombre del programa'));
         $grid->column('Descripción', __('Descripción'));
-        //$grid->column('Logo', __('Logo'))->display(function ($logo) {
-        //    return $logo ? "<img src='/storage/$logo' style='max-width:100px; max-height:100px;'>" : 'No cargado';
-        //});
         $grid->column('Logo')->image();
         $grid->column('Correo', __('Correo'));
         $grid->column('Teléfono', __('Teléfono'));
@@ -100,7 +105,7 @@ class ProgramaController extends AdminController
         $grid->column('Fecha_generación_del_registro_calificado', __('Fecha generación del registro calificado'));
         $grid->column('Número_de_resolución', __('Número de resolución'));
         $grid->column('Resolución_de_registro_calificado', __('Resolución de registro calificado'))->display(function ($pdf) {
-            return $pdf ? "<a href='/storage/$pdf' target='_blank'>Ver PDF</a>" : 'No cargado';
+            return $pdf ? "<a href='/uploads/$pdf' target='_blank'>Ver PDF</a>" : 'No cargado';
         });
         $grid->column('created_at', __('Created at'));
         $grid->column('updated_at', __('Updated at'));
@@ -165,25 +170,44 @@ class ProgramaController extends AdminController
     protected function form()
     {
         $form = new Form(new Programa());
-
-        $form->text('Código_SNIES', __('Código SNIES'));
-        $form->text('Nombre_del_programa', __('Nombre del programa'));
-        $form->textarea('Descripción', __('Descripción'));
-        $form->image('Logo', __('Logo'))->move('programas/logos')->uniqueName();
-        $form->text('Correo', __('Correo'));
-        $form->text('Teléfono', __('Teléfono'));
-        $form->select('Lineas_de_trabajo', __('Lineas de trabajo'))->options([
+        
+        $form->text('Código_SNIES', __('Código SNIES'))
+            ->creationRules('required|max:10|unique:programas,Código_SNIES')
+            ->updateRules('required|max:10|unique:programas,Código_SNIES,{{id}}');
+        $form->text('Nombre_del_programa', __('Nombre del programa'))
+                ->rules('required|max:255');
+        $form->textarea('Descripción', __('Descripción'))
+                ->rules('required');
+        $form->image('Logo', __('Logo'))
+            ->move('programas/logos')->uniqueName()
+            ->creationRules('required|image|mimes:jpeg,png,jpg,gif|max:5000')
+            ->updateRules('nullable|image|mimes:jpeg,png,jpg,gif|max:5000');
+        $form->text('Correo', __('Correo'))
+                ->rules('required|email');
+        $form->text('Teléfono', __('Teléfono'))
+                ->rules('required|max:10');
+        $form->select('Lineas_de_trabajo', __('Líneas de trabajo'))->options([
             'Ingeniería de Software' => 'Ingeniería de Software',
             'Inteligencia Artificial' => 'Inteligencia Artificial',
             'Ciencia de Datos' => 'Ciencia de Datos',
             'IoT y Tecnologías 4.0' => 'IoT y Tecnologías 4.0',
-        ]);
+        ])->rules('required');
         $form->select('Coordinador_asignado', __('Coordinador asignado'))
-        ->options(\App\Models\Coordinador::pluck('Nombre', 'id')->toArray());
-        $form->multipleSelect('docentes', 'Docentes')->options(Docente::all()->pluck('Nombre', 'id'));
-        $form->date('Fecha_generación_del_registro_calificado', __('Fecha generación del registro calificado'))->default(date('Y-m-d'));
-        $form->text('Número_de_resolución', __('Número de resolución'));
-        $form->file('Resolución_de_registro_calificado', __('Resolución de registro calificado'))->move('programas/resoluciones')->uniqueName();
+                ->options(\App\Models\Coordinador::pluck('Nombre', 'id')->toArray())
+                ->rules('required');
+        $form->multipleSelect('docentes', 'Docentes')
+                ->options(Docente::all()->pluck('Nombre', 'id'))
+                ->rules('required');
+        $form->date('Fecha_generación_del_registro_calificado', __('Fecha generación del registro calificado'))
+                ->default(date('Y-m-d'))
+                ->rules('required|date');
+        $form->text('Número_de_resolución', __('Número de resolución'))
+                ->rules('required|max:50');
+        $form->file('Resolución_de_registro_calificado', __('Resolución de registro calificado'))
+            ->move('programas/resoluciones')->uniqueName()
+            ->creationRules('required|mimes:pdf|max:10000') 
+            ->updateRules('nullable|mimes:pdf|max:10000');
+
 
         return $form;
     }

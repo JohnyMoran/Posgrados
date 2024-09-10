@@ -176,30 +176,50 @@ class EstudianteController extends AdminController
     {
         $form = new Form(new Estudiante());
 
-        $form->text('Nombre', __('Nombre'));
-        $form->text('Identificación', __('Identificación'));
-        $form->text('Código_estudiantil', __('Código estudiantil'));
-        $form->image('Fotografía', __('Fotografía'))->move('/estudiantes')->uniqueName();
-        $form->text('Dirección_de_residencia', __('Dirección de residencia'));
-        $form->text('Teléfono', __('Teléfono'));
-        $form->text('Correo', __('Correo'));
+        $form->text('Nombre', __('Nombre'))
+            ->rules('required|max:255');
+        $form->text('Identificación', __('Identificación'))
+            ->creationRules('required|max:20|unique:estudiantes,Identificación')
+            ->updateRules('required|max:20|unique:estudiantes,Identificación,{{id}}');
+        $form->text('Código_estudiantil', __('Código estudiantil'))
+            ->creationRules('required|max:20|unique:estudiantes,Código_estudiantil')
+            ->updateRules('required|max:20|unique:estudiantes,Código_estudiantil,{{id}}');
+        $form->image('Fotografía', __('Fotografía'))->move('/estudiantes')->uniqueName()
+            ->creationRules('required|image|mimes:jpeg,png,jpg,gif|max:5000')
+            ->updateRules('nullable|image|mimes:jpeg,png,jpg,gif|max:5000');
+        $form->text('Dirección_de_residencia', __('Dirección de residencia'))
+            ->rules('nullable|max:255');
+        $form->text('Teléfono', __('Teléfono'))
+            ->rules('nullable|max:10');
+        $form->text('Correo', __('Correo'))
+            ->rules('required|email');
         $form->select('Género', __('Género'))->options([
             'Masculino' => 'Masculino',
             'Femenino' => 'Femenino',
             'Otro' => 'Otro',
-        ]);
-        $form->date('Fecha_de_nacimiento', __('Fecha de nacimiento'))->default(date('Y-m-d'));
+        ])
+        ->rules('required|in:Masculino,Femenino,Otro');
+        $form->date('Fecha_de_nacimiento', __('Fecha de nacimiento'))->default(date('Y-m-d'))
+            ->rules('required|date|before_or_equal:today');
         $form->select('Estado_civil', __('Estado civil'))->options([
             'Soltero' => 'Soltero',
             'Casado' => 'Casado',
             'Divorciado' => 'Divorciado',
             'Viudo' => 'Viudo',
-        ]);
-        $form->text('Semestre', __('Semestre'));
-        $form->date('Fecha_de_ingreso', __('Fecha de ingreso'))->default(date('Y-m-d'));
-        $form->date('Fecha_de_egreso', __('Fecha de egreso'))->default(date('Y-m-d'));
-        $form->select('cohorte_id', __('Cohorte'))->options(Cohorte::pluck('Nombre', 'id'));
-        $form->select('programa_id', __('Programa'))->options(Programa::pluck('Nombre_del_programa', 'id'));
+        ])
+            ->rules('required');
+        $form->text('Semestre', __('Semestre'))
+            ->rules('required|numeric|min:1');
+        $form->date('Fecha_de_ingreso', __('Fecha de ingreso'))->default(date('Y-m-d'))
+            ->rules('required|date|before_or_equal:today');
+        $form->date('Fecha_de_egreso', __('Fecha de egreso'))->default(date('Y-m-d'))
+            ->rules('required|date|after_or_equal:Fecha_de_ingreso');
+        $form->select('cohorte_id', __('Cohorte'))->options(Cohorte::pluck('Nombre', 'id'))
+            ->creationRules('required|exists:cohortes,id')
+            ->updateRules('nullable|exists:cohortes,id');
+        $form->select('programa_id', __('Programa'))->options(Programa::pluck('Nombre_del_programa', 'id'))
+            ->creationRules('required|exists:programas,id')
+            ->updateRules('nullable|exists:programas,id');
 
         return $form;
     }

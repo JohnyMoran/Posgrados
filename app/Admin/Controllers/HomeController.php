@@ -3,34 +3,20 @@
 namespace App\Admin\Controllers;
 
 use App\Http\Controllers\Controller;
-use OpenAdmin\Admin\Admin;
-use OpenAdmin\Admin\Controllers\Dashboard;
-use OpenAdmin\Admin\Layout\Column;
+use App\Models\Programa;
 use OpenAdmin\Admin\Layout\Content;
-use OpenAdmin\Admin\Layout\Row;
 
 class HomeController extends Controller
 {
     public function index(Content $content)
     {
+        // Obtener los programas desde la base de datos
+        $programas = Programa::all();
+
         return $content
-            ->css_file(Admin::asset("open-admin/css/pages/dashboard.css"))
             ->title('Dashboard')
-            ->description('Posgrados Ingeniería de Sistemas')
-            ->row(Dashboard::title())
-            ->row(function (Row $row) {
-
-                $row->column(4, function (Column $column) {
-                    $column->append(Dashboard::environment());
-                });
-
-                $row->column(4, function (Column $column) {
-                    $column->append(Dashboard::extensions());
-                });
-
-                $row->column(4, function (Column $column) {
-                    $column->append(Dashboard::dependencies());
-                });
-            });
+            ->description('Listado de Programas')
+            ->view('admin.dashboard', ['programas' => $programas]);
     }
+
 }

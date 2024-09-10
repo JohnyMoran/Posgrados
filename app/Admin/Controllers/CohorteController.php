@@ -154,12 +154,23 @@ class CohorteController extends AdminController
     {
         $form = new Form(new Cohorte());
 
-        $form->text('Código', __('Código'));
-        $form->text('Nombre', __('Nombre'));
-        $form->date('Fecha_de_inicio', __('Fecha de inicio'))->default(date('Y-m-d'));
-        $form->date('Fecha_de_finalización', __('Fecha de finalización'))->default(date('Y-m-d'));
-        $form->text('Número_de_estudiantes_matriculados', __('Número de estudiantes matriculados'));
-        $form->select('programa_id', __('Programa'))->options(Programa::pluck('Nombre_del_programa', 'id'));
+        $form->text('Código', __('Código'))
+            ->creationRules('required|max:10|unique:cohortes,Código')
+            ->updateRules('required|max:10|unique:cohortes,Código,{{id}}');
+        $form->text('Nombre', __('Nombre'))
+            ->rules('required|max:255'); 
+        $form->date('Fecha_de_inicio', __('Fecha de inicio'))
+            ->default(date('Y-m-d'))
+            ->rules('required|date|before_or_equal:Fecha_de_finalización');
+        $form->date('Fecha_de_finalización', __('Fecha de finalización'))
+            ->default(date('Y-m-d'))
+            ->rules('required|date|after_or_equal:Fecha_de_inicio');
+        $form->text('Número_de_estudiantes_matriculados', __('Número de estudiantes matriculados'))
+            ->rules('nullable|integer|min:0');
+        $form->select('programa_id', __('Programa'))
+            ->options(Programa::pluck('Nombre_del_programa', 'id'))
+            ->creationRules('required|exists:programas,id')
+            ->updateRules('required|exists:programas,id');
 
         return $form;
     }

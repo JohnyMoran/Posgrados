@@ -90,7 +90,9 @@ class ProgramaController extends AdminController
         $grid->column('id', __('Id'));
         $grid->column('Código_SNIES', __('Código SNIES'));
         $grid->column('Nombre_del_programa', __('Nombre del programa'));
-        $grid->column('Descripción', __('Descripción'));
+        $grid->column('Descripción', __('Descripción'))->display(function($descripcion) {
+            return "<div style='width: 400px; height: 200px; overflow: hidden; white-space: normal; word-wrap: break-word; font-size: 14px;'>" . $descripcion . "</div>";
+        });
         $grid->column('Logo')->image();
         $grid->column('Correo', __('Correo'));
         $grid->column('Teléfono', __('Teléfono'));

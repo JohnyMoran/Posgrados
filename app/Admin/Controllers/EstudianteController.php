@@ -88,9 +88,6 @@ class EstudianteController extends AdminController
         $grid->column('Nombre', __('Nombre'));
         $grid->column('Identificación', __('Identificación'));
         $grid->column('Código_estudiantil', __('Código estudiantil'));
-        //$grid->column('Fotografía', __('Fotografía'))->display(function ($foto) {
-        //    return $foto ? "<img src='/storage/$foto' style='max-width:100px; max-height:100px;'>" : 'No cargada';
-        //});
         $grid->column('Fotografía')->image();
         $grid->column('Dirección_de_residencia', __('Dirección de residencia'));
         $grid->column('Teléfono', __('Teléfono'));

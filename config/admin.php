@@ -11,7 +11,7 @@ return [
     | login page.
     |
     */
-    'name' => 'SISTEMA DE INFORMACIÓN DE POSGRADOS DE INGENIERÍA DE SISTEMAS',
+    'name' => 'SIPOS',
 
     /*
     |--------------------------------------------------------------------------

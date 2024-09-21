@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('coordinador_asistente', function (Blueprint $table) {
-            // Crear columnas para el ID del coordinador y del asistente
-            $table->unsignedInteger('coordinador_id');
-            $table->unsignedInteger('asistente_id');
+            
+            $table->unsignedBigInteger('asistente_id');  
+            $table->unsignedBigInteger('coordinador_id');  
 
             // Definir claves foráneas
             $table->foreign('coordinador_id')->references('id')->on('coordinadores')->onDelete('cascade');

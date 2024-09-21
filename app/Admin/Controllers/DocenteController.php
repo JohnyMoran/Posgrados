@@ -197,8 +197,9 @@ class DocenteController extends AdminController
             'Ingeniería de software' => 'Ingeniería de software',
             'Telecomunicaciones' => 'Telecomunicaciones',
             'Bases de datos' => 'Bases de datos',
+            'Inteligencia artificial' => 'Inteligencia artificial',
         ])
-            ->rules('required|in:Ingeniería de software,Telecomunicaciones,Bases de datos');
+            ->rules('required|in:Ingeniería de software,Telecomunicaciones,Bases de datos,Inteligencia artificial');
         $form->multipleSelect('programa', 'Programa')
             ->options(Programa::all()->pluck('Nombre_del_programa', 'id'));
 

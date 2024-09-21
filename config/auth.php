@@ -61,15 +61,17 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'driver' => 'custom',
+            'provider' => App\Providers\CustomUserProvider::class,
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+
+        'admin_users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\AdminUser::class,
+        ],
     ],
+       
 
     /*
     |--------------------------------------------------------------------------
@@ -92,10 +94,16 @@ return [
 
     'passwords' => [
         'users' => [
-            'provider' => 'users',
-            'table' => 'password_reset_tokens',
-            'expire' => 60,
-            'throttle' => 60,
+        'provider' => 'users',
+        'table' => 'password_reset_tokens', // Nombre de la tabla para los resets de contraseña
+        'expire' => 60,
+    ],
+
+    'admin_users' => [
+        'provider' => 'admin_users',
+        'table' => 'password_reset_tokens', // Puedes usar la misma tabla si la tienes, o crear una específica
+        'expire' => 60,
+        'throttle' => 60,
         ],
     ],
 

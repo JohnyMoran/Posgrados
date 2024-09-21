@@ -14,7 +14,7 @@ class CreateCoordinadoresTable extends Migration
     public function up()
     {
         Schema::create('coordinadores', function (Blueprint $table) {
-            $table->increments('id');
+            $table->unsignedBigInteger('id', true);
             $table->string('Nombre')->nullable();
             $table->string('Identificación')->nullable();
             $table->string('Dirección')->nullable();

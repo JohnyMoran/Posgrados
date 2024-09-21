@@ -72,7 +72,7 @@ class CohorteController extends AdminController
             // Filtrar para que el coordinador vea solo la información relacionada con él mismo
             $grid->model()->whereHas('programa', function ($query) use ($user) {
                 $query->whereHas('coordinador', function ($query) use ($user) {
-                    $query->where('Nombre', $user->name); // Asume que el nombre del usuario es el nombre del coordinador
+                    $query->where('Correo', $user->username); // Asume que el nombre del usuario es el correo del coordinador
                 });
             });
 

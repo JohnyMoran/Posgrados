@@ -3,15 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use OpenAdmin\Admin\Auth\Database\Role;
 
-class User extends Authenticatable
+class User extends Authenticatable implements CanResetPasswordContract
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, CanResetPassword;
 
     /**
      * The attributes that are mass assignable.
@@ -44,9 +47,21 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    // Implementa el método requerido por CanResetPasswordContract
+    public function getEmailForPasswordReset()
+    {
+        return $this->email; // Retorna el correo electrónico del usuario
+    }
+    public function getResetPasswordUrl()
+    {
+        return route('password.reset', ['token' => $this->resetPasswordToken]);
+    }
+
     public function coordinador()
     {
         return $this->hasOne(Coordinador::class, 'coordinador_asistente', 'asistente_id', 'coordinador_id');
     }
+
+    
 
 }
